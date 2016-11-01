@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-# self-driving-car-nano-degree
-projects of udacity's self driving car nano degree
-=======
 #**Finding Lane Lines on the Road** 
 <img src="laneLines_thirdPass.jpg" width="480" alt="Combined Image" />
 
@@ -68,9 +64,5 @@ Jupyter is an ipython notebook where you can run blocks of code and see results 
 
 `> jupyter notebook`
 
-<<<<<<< HEAD
 A browser window will appear showing the contents of the current directory.  Navigate to the P0\_prototype directory, and click on the file called "P0\_prototype.ipynb".  Another browser window will appear displaying the notebook.  Follow the instructions in the notebook to complete the project.  
->>>>>>> Add project files
-=======
-A browser window will appear showing the contents of the current directory.  Click on the file called "P1.ipynb".  Another browser window will appear displaying the notebook.  Follow the instructions in the notebook to complete the project.  
->>>>>>> Fix instructions pointing to non-existant notebook
+
