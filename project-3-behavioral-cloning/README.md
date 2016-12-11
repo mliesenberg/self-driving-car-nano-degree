@@ -1,5 +1,5 @@
 # Architecture of the network
-
+The architecture of the network was taken from the nvidia paper referenced in the task.
 ![Network Architecture from the reference paper](img/nvidia-network-layout.png)
 
 |Layer (type) | Output Shape | Param # | Connected to |                
