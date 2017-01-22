@@ -23,8 +23,9 @@ highlighting mostly the lanes. Among the filters were:
 - gradient magnitude
 - gradient direction
 - different color channels
+
 Example application of the pipeline:
-![Thresholding applied to example image](/img/binary_output.png "binary images compared to input image")
+![Thresholding applied to example image](./img/binary_output.png "binary images compared to input image")
 
 ### extraction of points for warping the image to bird's eye view
 to warp the image to bird's eye view lines in binary image were extracted using
