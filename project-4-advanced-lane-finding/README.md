@@ -17,6 +17,8 @@ After camera calibration the following steps are taken for each image
 - the current lane is colored in the original image based on the extracted polynomials
 
 ## Details of the pipeline
+Example application of the pipeline:
+![Thresholding applied to example image](/img/binary_output.png "binary images compared to input image")
 
 
 the output of the pipeline for the standard video can be found [here](https://youtu.be/wswqXJ_hMF4)
