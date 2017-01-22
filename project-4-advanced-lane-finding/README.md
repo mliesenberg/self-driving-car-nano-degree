@@ -17,9 +17,23 @@ After camera calibration the following steps are taken for each image
 - the current lane is colored in the original image based on the extracted polynomials
 
 ## Details of the pipeline
+### conversion to binary images
+several filters were applied to the image and then combined to produce a binary image
+highlighting mostly the lanes. Among the filters were:
+- gradient magnitude
+- gradient direction
+- different color channels
 Example application of the pipeline:
 ![Thresholding applied to example image](/img/binary_output.png "binary images compared to input image")
 
+### extraction of points for warping the image to bird's eye view
+to warp the image to bird's eye view lines in binary image were extracted using
+a hough transform
+
+### identifying lane pixels in a bird's eye view image
+Identifying the pixels of lane lines in the bird's eye view images is done by identifying
+peaks in a histogram representation of bands of the image.
+A possible improvement here is to filter outliers detected in while sliding across the image. 
 
 the output of the pipeline for the standard video can be found [here](https://youtu.be/wswqXJ_hMF4)
 
