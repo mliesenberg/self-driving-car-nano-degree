@@ -25,11 +25,14 @@ prev_image_array = None
 
 # in the training stage, the image data was adopted to match the format of the nvidia paper
 # we have to do the same here.
-def preprocess(image):
-    image = cv2.resize(image, (200, 66), interpolation=cv2.INTER_AREA)
-    image = cv2.cvtColor(image, cv2.COLOR_RGB2YUV)
-    return image   
- 
+def preprocess(image, top_crop_percent=0.35, bottom_crop_percent=0.1):
+    # constrain to region of interest in y direction
+    top = int(np.ceil(image.shape[0] * top_percent))
+    bottom = image.shape[0] - int(np.ceil(image.shape[0] * bottom_percent))
+    image = image[top:bottom, :]
+    image = cv2.resize(image, (64, 64), interpolation=cv2.INTER_AREA)
+    return image
+
 @sio.on('telemetry')
 def telemetry(sid, data):
     # The current steering angle of the car
