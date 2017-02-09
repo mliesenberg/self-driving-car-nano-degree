@@ -27,8 +27,8 @@ prev_image_array = None
 # we have to do the same here.
 def preprocess(image, top_crop_percent=0.35, bottom_crop_percent=0.1):
     # constrain to region of interest in y direction
-    top = int(np.ceil(image.shape[0] * top_percent))
-    bottom = image.shape[0] - int(np.ceil(image.shape[0] * bottom_percent))
+    top = int(np.ceil(image.shape[0] * top_crop_percent))
+    bottom = image.shape[0] - int(np.ceil(image.shape[0] * bottom_crop_percent))
     image = image[top:bottom, :]
     image = cv2.resize(image, (64, 64), interpolation=cv2.INTER_AREA)
     return image
