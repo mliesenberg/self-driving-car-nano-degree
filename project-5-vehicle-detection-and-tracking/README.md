@@ -4,7 +4,7 @@
 - [source code](#source-code)
 - [pipeline](#pipline)
 - [outlook and discussion](#outlook-and-discussion)
----
+
 
 ## source code
 The jupyter notebook uses a number of python files which contain the bulk of the work. Those are
@@ -15,7 +15,7 @@ be discussed in detail in the following selection
 to turn the heatmap into a bounding box to be drawn on the output frame
 - `pipeline.py` defines methods to generate training and test data
 - `window_detection.py` contains the code to generate and evaluate sliding windows used for detection
----
+
 
 ## pipeline
 The pipeline of the project comprises of a number of steps, two of which I'd like to discuss further - feature extraction and vehicle detection.
@@ -26,20 +26,19 @@ Feature extraction is defined in the file `pipeline.py` in the function `extract
 ![hog features](img/hog_features.png)
 - **Spatial binning of color**: the function `spatial_binning_features` returns a scaled down version (16 by 16 pixels) of an image as a one-dimensional feature vector
 - **Histograms of color**: the function `color_histogram_features` returns the histograms of all three color channels of the `YCrCb` color space as a single one-dimensional feature vector. The bin size is 16.
----
+
 
 ### vehicle detection
 Based on the extracted features, I trained a `LinearSVC` as provided by scikit learn. Performance (accuracy) on the test set was a bit higher than 98%. Before settling on the `LinearSVC` I tried a `GradientBoostingClassifier` and a `SGDClassifier` both of which took longer to train and fared not significantly better.
 I experimented a bit with GridSearchCV to find better parameters than the standard set, but decided to not use any special configuration apart from the class balancing.
 Below the output of the sliding windows and the classifier applied to the six test images.
 ![classified images](img/classifier.png)
-
 When applying this setup to the video, I used a heatmap to eliminate duplicates and extract bounding boxes for the detected vehicles. For a bounding box to be displayed across multiple frames the car has to appear in several consecutive frames as tracked by merging the heatmaps.
----
+
 
 ### the video
 Here's a [link to my video result](./project_video.mp4)
----
+
 
 ### outlook and discussion
 Looking at the performance in the video, there are a number of things that could be improved
