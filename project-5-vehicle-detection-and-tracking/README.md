@@ -37,7 +37,7 @@ When applying this setup to the video, I used a heatmap to eliminate duplicates 
 
 
 ### the video
-Here's a [link to my video result](./project_video.mp4)
+Here's a [link to my video result](./project_video_out_.mp4)
 
 
 ### outlook and discussion
