@@ -7,7 +7,7 @@ from heatmap import add_heat, apply_threshold, draw_labeled_bboxes
 
 class VideoProcessor2():
 
-    def __init__(self, classifier, scaler, windows, threshold_single=1, threshold_combined=8, smoothing=0.0):
+    def __init__(self, classifier, scaler, windows, threshold_single=1, threshold_combined=2, smoothing=0.2):
         self.classifier = classifier
         self.scaler = scaler
         self.windows = windows

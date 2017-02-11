@@ -3,9 +3,8 @@ import numpy as np
 from skimage.feature import hog
 
 # create features based on the histograms of the individual color channels.
-def color_histogram_features(image, nbins=16, bins_range=(0, 256), color_space='RGB'):
-    if color_space != 'RGB':
-        image = cv2.cvtColor(image, cv2.RGB2HLS)
+def color_histogram_features(image, nbins=16, bins_range=(0, 256)):
+    image = cv2.cvtColor(image, cv2.COLOR_RGB2YCrCb)
     # Compute the histogram of the RGB channels separately
     rhist = np.histogram(image[:,:,0], bins=nbins, range=bins_range)
     ghist = np.histogram(image[:,:,1], bins=nbins, range=bins_range)
