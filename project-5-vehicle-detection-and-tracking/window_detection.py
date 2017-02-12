@@ -8,12 +8,12 @@ def create_windows(window_parameters, image_size):
     """
     output = []
     for size, limits in window_parameters:
-        windows = slide_window(image_size, x_start_stop=[None, None], y_start_stop=limits,
+        windows = slide_window(image_size, x_start_stop=[300, None], y_start_stop=limits,
                                xy_window=size, xy_overlap=(0.5, 0.5))
         output.append(windows)
     return output
 
-def slide_window(img_shape, x_start_stop=[None, None], y_start_stop=None,
+def slide_window(img_shape, x_start_stop=[300, None], y_start_stop=None,
                  xy_window=None, xy_overlap=(0.5, 0.5)):
     """
         create a list of windows to check for vehicles
@@ -73,7 +73,7 @@ def search_windows(img, windows, clf, scaler, decision_threshold=0.75):
         #4) Extract features for that window using single_img_features()
         features = extract_features([test_img])
         #5) Scale extracted features to be fed to classifier
-        test_features = scaler.transform(np.array(features)).reshape(1, -1)
+        test_features = scaler.transform(np.array(features).reshape(1, -1))
 
         #6) Predict using your classifier
         dec = clf.decision_function(test_features)

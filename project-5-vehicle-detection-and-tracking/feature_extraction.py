@@ -23,9 +23,17 @@ def spatial_binning_features(image, size=(16, 16)):
     return features
 
 # create HOG features of an image as discussd in class
-def hog_features(image, orient=9, pix_per_cell=8, cell_per_block=2, visualize=False):
-    image = cv2.cvtColor(image, cv2.COLOR_RGB2YCrCb)
+def hog_features(image, orient=9, pix_per_cell=8, cell_per_block=2, visualize=False, all_channels=True):
+    image = cv2.cvtColor(image, cv2.COLOR_RGB2YUV)
+    features = []
+    for idx in range(image.shape[2]):
+        channel_features = hog(image[:,:,idx],
+                               orientations=orient,
+                               pixels_per_cell=(pix_per_cell, pix_per_cell),
+                               cells_per_block=(cell_per_block, cell_per_block),
+                               transform_sqrt=True,
+                               visualise=visualize,
+                               feature_vector=True)
+        features.append(channel_features)
 
-    return hog(image[:,:,0], orientations=orient, pixels_per_cell=(pix_per_cell, pix_per_cell),
-                    cells_per_block=(cell_per_block, cell_per_block), transform_sqrt=True,
-                    visualise=visualize, feature_vector=True)
+    return features

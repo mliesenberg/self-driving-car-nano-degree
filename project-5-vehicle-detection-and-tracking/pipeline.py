@@ -10,9 +10,6 @@ from feature_extraction import spatial_binning_features, color_histogram_feature
 
 # Define a function to extract features from a list of images
 def extract_features(images, spatial_size=(32, 32), hist_bins=32, hist_range=(0, 256)):
-    """
-
-    """
     features = []
     for image in images:
         # resize for conformity across input
@@ -24,9 +21,10 @@ def extract_features(images, spatial_size=(32, 32), hist_bins=32, hist_range=(0,
         hist_features = color_histogram_features(image, nbins=hist_bins, bins_range=hist_range)
         # hog features
         hog = hog_features(image)
+        hog_concat = np.concatenate(hog)
 
         # Append the new feature vector to the features list
-        features.append(np.concatenate((spatial_features, hist_features, hog)))
+        features.append(np.concatenate((spatial_features, hist_features, hog_concat)))
 
     # Return list of feature vectors
     return features

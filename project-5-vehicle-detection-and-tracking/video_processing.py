@@ -5,7 +5,7 @@ from window_detection import search_windows
 from heatmap import add_heat, apply_threshold, draw_labeled_bboxes
 
 
-class VideoProcessor2():
+class VideoProcessor():
 
     def __init__(self, classifier, scaler, windows, threshold_single=1, threshold_combined=2, smoothing=0.2):
         self.classifier = classifier
