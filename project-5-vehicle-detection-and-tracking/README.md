@@ -30,8 +30,8 @@ Feature extraction is defined in the file `pipeline.py` in the function `extract
 
 ### vehicle detection
 To detect vehicles in each frame, a two stage approach was taken:
-1. defining and restricting the search space in the frame which is done by means of a sliding approach
-2. train a classifier to decide if something is a vehicle or not
+- defining and restricting the search space in the frame which is done by means of a sliding approach
+- train a classifier to decide if something is a vehicle or not
 Below a more thorough explanation of both stages.
 
 ### sliding windows
