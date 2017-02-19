@@ -1,0 +1,2 @@
+model_checkpoint_path: "model-traffic-final-22.ckpt"
+all_model_checkpoint_paths: "model-traffic-final-22.ckpt"
