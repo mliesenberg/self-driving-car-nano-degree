@@ -203,14 +203,14 @@ void UKF::Prediction(double delta_t) {
   //predict sigma points
   for (int i=0; i<2 * n_aug_ + 1; i++) {
     // for readability
-    double px = Xsig_aug(0,i);
-    double py = Xsig_aug(1,i);
-    double v  = Xsig_aug(2,i);
-    double psi = Xsig_aug(3,i);
-    double psiDot = Xsig_aug(4,i);
+    const double px = Xsig_aug(0,i);
+    const double py = Xsig_aug(1,i);
+    const double v  = Xsig_aug(2,i);
+    const double psi = Xsig_aug(3,i);
+    const double psiDot = Xsig_aug(4,i);
 
-    double nu_a = Xsig_aug(5,i);
-    double nu_psiDDot = Xsig_aug(6,i);
+    const double nu_a = Xsig_aug(5,i);
+    const double nu_psiDDot = Xsig_aug(6,i);
     double px_pred, py_pred;
     
     //avoid division by zero
@@ -292,10 +292,10 @@ void UKF::UpdateLidar(MeasurementPackage measurement_pack) {
 
     // state difference
     VectorXd x_diff = Xsig_pred_.col(i) - x_;
-
+    x_diff(3) = normalize_angle(x_diff(3));
     // angle normalization
-    while (x_diff(3) > M_PI) x_diff(3) -= 2. * M_PI;
-    while (x_diff(3) < -M_PI) x_diff(3) += 2. * M_PI;
+    // while (x_diff(3) > M_PI) x_diff(3) -= 2. * M_PI;
+    // while (x_diff(3) < -M_PI) x_diff(3) += 2. * M_PI;
 
     // residual
     VectorXd z_diff = Zsig.col(i) - z_pred;
@@ -332,11 +332,11 @@ void UKF::UpdateRadar(MeasurementPackage measurement_pack) {
   // transform sigma points into measurement space
   MatrixXd Zsig = MatrixXd(n_z, 2 * n_aug_ + 1);
   for (int i=0; i<2 * n_aug_ + 1; i++) {
-    double px = Xsig_pred_(0,i);
-    double py = Xsig_pred_(1,i);
-    double v  = Xsig_pred_(2,i);
-    double psi = Xsig_pred_(3,i);
-    double psiDot = Xsig_pred_(4,i);
+    const double px = Xsig_pred_(0,i);
+    const double py = Xsig_pred_(1,i);
+    const double v  = Xsig_pred_(2,i);
+    const double psi = Xsig_pred_(3,i);
+    const double psiDot = Xsig_pred_(4,i);
 
     Zsig(0,i) = sqrt(px * px + py * py);
     Zsig(1,i) = std::atan2(py, px);
@@ -359,15 +359,17 @@ void UKF::UpdateRadar(MeasurementPackage measurement_pack) {
   for (int i = 0; i < 2 * n_aug_ + 1; i++) {  // iterate over sigma points
     // state difference
     VectorXd x_diff = Xsig_pred_.col(i) - x_;
+    x_diff(3) = normalize_angle(x_diff(3));
     // angle normalization
-    while (x_diff(3) > M_PI) x_diff(3) -= 2. * M_PI;
-    while (x_diff(3) < -M_PI) x_diff(3) += 2. * M_PI;
+    // while (x_diff(3) > M_PI) x_diff(3) -= 2. * M_PI;
+    // while (x_diff(3) < -M_PI) x_diff(3) += 2. * M_PI;
 
     // residual
     VectorXd z_diff = Zsig.col(i) - z_pred;
-    // angle normalization
-    while (z_diff(1) > M_PI) z_diff(1) -= 2. * M_PI;
-    while (z_diff(1) < -M_PI) z_diff(1) += 2. * M_PI;
+    z_diff(1) = normalize_angle(z_diff(1));
+	// angle normalization
+    // while (z_diff(1) > M_PI) z_diff(1) -= 2. * M_PI;
+    // while (z_diff(1) < -M_PI) z_diff(1) += 2. * M_PI;
 
     S += weights_(i) * z_diff * z_diff.transpose();
     Tc += weights_(i) * x_diff * z_diff.transpose();
@@ -388,4 +390,10 @@ void UKF::UpdateRadar(MeasurementPackage measurement_pack) {
 
   // calculate the NIS
   NIS_radar_ = z_diff_mean.transpose() * S_inv * z_diff_mean;
+}
+
+double UKF::normalize_angle(double to_normalize) {
+    while (to_normalize > M_PI) to_normalize -= 2. * M_PI;
+    while (to_normalize < -M_PI) to_normalize += 2. * M_PI;
+    return to_normalize;
 }
