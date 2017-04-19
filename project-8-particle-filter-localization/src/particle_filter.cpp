@@ -45,6 +45,7 @@ void ParticleFilter::init(double gps_x, double gps_y, double theta, double std[]
     particle.weight = 1.0;
     
     particles.push_back(particle);
+    weights.push_back(particle.weight);
   }
   
   is_initialized = true;
@@ -114,15 +115,10 @@ void ParticleFilter::resample() {
   //   http://en.cppreference.com/w/cpp/numeric/random/discrete_distribution
   
   std::default_random_engine gen;
-  std::vector<double> particle_weights;
   std::vector<Particle> resampled_particles;
   
-  for (Particle particle : particles) {
-    particle_weights.push_back(particle.weight);
-  }
-
   // discrete_distribution to sample particles with probability proportional to their weight
-  std::discrete_distribution<> dd(particle_weights.begin(), particle_weights.end());
+  std::discrete_distribution<> dd(weights.begin(), weights.end());
   
   for (int i = 0; i < num_particles; i++) {
     int idx_to_sample = dd(gen);
