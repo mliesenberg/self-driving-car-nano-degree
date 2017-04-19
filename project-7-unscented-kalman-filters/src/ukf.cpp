@@ -59,18 +59,13 @@ UKF::UKF() {
   weights_(0) = lambda_ / (lambda_ + n_aug_);
   weights_.tail(2*n_aug_).fill( 0.5 / (lambda_ + n_aug_) );
 
-  // create a 4D state vector, we don't know yet the values of the x state
+  // create a 5D state vector, we don't know yet the values of the x state
   // [pos1 pos2 vel_abs yaw_angle yaw_rate] in SI units and rad
   x_ = VectorXd(n_x_);
 
   // state covariance matrix P
   // only position can be initialized with first measurement
-  P_ = MatrixXd(n_x_, n_x_);
-  P_ <<   1, 0, 0, 0, 0,
-          0, 1, 0, 0, 0,
-		  0, 0, 1, 0, 0,
-	      0, 0, 0, 1, 0,
-          0, 0, 0, 0, 1;
+  P_ = MatrixXd::Identity(n_x_, n_x_);
 
   // predicted sigma points matrix; we don't know yet the values
   Xsig_pred_ = MatrixXd(n_x_, 2 * n_aug_ + 1);
@@ -105,26 +100,31 @@ void UKF::ProcessMeasurement(MeasurementPackage measurement_pack) {
       /**
        *Convert radar from polar to cartesian coordinates and initialize state.
        */
-      std::cout << "Initializating with radar measurement" << std::endl;
+      std::cout << "initializing with radar measurement" << std::endl;
 
-      x_ << cos(measurement_pack.raw_measurements_[1]) * measurement_pack.raw_measurements_[0],
-            sin(measurement_pack.raw_measurements_[1]) * measurement_pack.raw_measurements_[0],
-            cos(measurement_pack.raw_measurements_[1]) * measurement_pack.raw_measurements_[2],
-            sin(measurement_pack.raw_measurements_[1]) * measurement_pack.raw_measurements_[2];
+      x_ << cos(measurement_pack.raw_measurements_[1]) * measurement_pack.raw_measurements_[0], // px
+            sin(measurement_pack.raw_measurements_[1]) * measurement_pack.raw_measurements_[0], // py
+            abs(measurement_pack.raw_measurements_[0]) * measurement_pack.raw_measurements_[2], // v_abs
+            0., // psi
+            0.; // psi_dot
       time_us_ = measurement_pack.timestamp_;
       is_initialized_ = true;
     } else if (measurement_pack.sensor_type_ == MeasurementPackage::LASER) {
       /**
        *Initialize state.
        */
-      std::cout << "Initializating with laser measurement" << std::endl;
+      std::cout << "initializing with laser measurement" << std::endl;
 
-	  //set the state with the initial location and zero velocity
-	  x_ << measurement_pack.raw_measurements_[0], measurement_pack.raw_measurements_[1], 0, 0;
-	  time_us_ = measurement_pack.timestamp_;
+      //set the state with the initial location and zero velocity
+      x_ << measurement_pack.raw_measurements_[0], // px
+            measurement_pack.raw_measurements_[1], // py
+            0., // v_abs
+            0., // psi
+            0.; // psi_dot
+      time_us_ = measurement_pack.timestamp_;
       is_initialized_ = true;
     } else {
-	  std::cout << "unkown sensor_type_" << measurement_pack.sensor_type_ << std::endl;
+      std::cout << "unkown sensor_type_" << measurement_pack.sensor_type_ << std::endl;
     }
 
     // done initializing, no need to predict or update
