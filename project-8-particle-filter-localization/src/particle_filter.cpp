@@ -56,31 +56,36 @@ void ParticleFilter::prediction(double delta_t, double std_pos[], double velocit
   // NOTE: When adding noise you may find std::normal_distribution and std::default_random_engine useful.
   //  http://en.cppreference.com/w/cpp/numeric/random/normal_distribution
   //  http://www.cplusplus.com/reference/random/default_random_engine/
-  if (yaw_rate > 0.) {
-    std::default_random_engine gen;
-    
-    const double std_x = std_pos[0];
-    const double std_y = std_pos[1];
-    const double std_theta = std_pos[2];
 
-    const double velocity_per_yaw = (velocity / yaw_rate);
-    const double yaw_times_delta_t = yaw_rate * delta_t;
-    
-    for (Particle particle : particles) {
-      
+  std::default_random_engine gen;
+
+  const double std_x = std_pos[0];
+  const double std_y = std_pos[1];
+  const double std_theta = std_pos[2];
+
+  const double velocity_per_yaw = (velocity / yaw_rate);
+  const double yaw_times_delta_t = yaw_rate * delta_t;
+
+  for (Particle particle : particles) {
+
+    if (abs(yaw_rate) > 0.00001) {
       particle.x = particle.x + velocity_per_yaw * (sin(particle.theta + yaw_times_delta_t) - sin(particle.theta));
       particle.y = particle.y + velocity_per_yaw * (cos(particle.theta) - cos(particle.theta + yaw_times_delta_t));
-      particle.theta = particle.theta + yaw_times_delta_t;
-      
-      // distributions to add measurement noise to the updates.
-      std::normal_distribution<double> dist_x(particle.x, std_x);
-      std::normal_distribution<double> dist_y(particle.y, std_y);
-      std::normal_distribution<double> dist_theta(particle.theta, std_theta);
-
-      particle.x = dist_x(gen);
-      particle.y = dist_y(gen);
-      particle.theta = dist_theta(gen);
+    } else {
+      particle.x = particle.x + velocity * delta_t * cos(particle.theta);
+      particle.y = particle.y + velocity * delta_t * sin(particle.theta);
     }
+
+    particle.theta = particle.theta + yaw_times_delta_t;
+
+    // distributions to add measurement noise to the updates.
+    std::normal_distribution<double> dist_x(particle.x, std_x);
+    std::normal_distribution<double> dist_y(particle.y, std_y);
+    std::normal_distribution<double> dist_theta(particle.theta, std_theta);
+
+    particle.x = dist_x(gen);
+    particle.y = dist_y(gen);
+    particle.theta = dist_theta(gen);
   }
 }
 
