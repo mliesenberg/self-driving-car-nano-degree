@@ -89,10 +89,6 @@ void ParticleFilter::prediction(double delta_t, double std_pos[], double velocit
   }
 }
 
-double calculate_distance(double dx, double dy) {
-  return sqrt(dx * dx + dy * dy);
-}
-
 void ParticleFilter::dataAssociation(std::vector<LandmarkObs> predicted, std::vector<LandmarkObs>& observations) {
   // Find the predicted measurement that is closest to each observed measurement and assign the 
   //   observed measurement to this particular landmark.
@@ -104,7 +100,7 @@ void ParticleFilter::dataAssociation(std::vector<LandmarkObs> predicted, std::ve
     
     for (int i = 0; i < predicted.size(); i++) {
       LandmarkObs current_prediction = predicted[i];
-      double distance = calculate_distance(current_prediction.x - obs.x, current_prediction.y - obs.y);
+      double distance = dist(current_prediction.x, current_prediction.y, obs.x, obs.y);
       
       if (distance < min_dist) {
         obs.id = i;
@@ -129,6 +125,13 @@ void ParticleFilter::updateWeights(double sensor_range,
   //   3.33. Note that you'll need to switch the minus sign in that equation to a plus to account 
   //   for the fact that the map's y-axis actually points downwards.)
   //   http://planning.cs.uiuc.edu/node99.html
+  for (Particle p : particles) {
+    // convert from vehicle to map coordinates
+
+    // find predicted landmark for each observation
+
+    // update the weights
+  }
 }
 
 void ParticleFilter::resample() {
