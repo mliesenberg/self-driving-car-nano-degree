@@ -114,7 +114,7 @@ void ParticleFilter::updateWeights(double sensor_range,
                                    double std_landmark[], 
                                    std::vector<LandmarkObs> observations, 
                                    Map map_landmarks) {
-  // TODO: Update the weights of each particle using a mult-variate Gaussian distribution. You can read
+  // Update the weights of each particle using a mult-variate Gaussian distribution. You can read
   //   more about this distribution here: https://en.wikipedia.org/wiki/Multivariate_normal_distribution
   // NOTE: The observations are given in the VEHICLE'S coordinate system. Your particles are located
   //   according to the MAP'S coordinate system. You will need to transform between the two systems.
@@ -126,11 +126,68 @@ void ParticleFilter::updateWeights(double sensor_range,
   //   for the fact that the map's y-axis actually points downwards.)
   //   http://planning.cs.uiuc.edu/node99.html
   for (Particle p : particles) {
+
     // convert from vehicle to map coordinates
+    std::vector<LandmarkObs> mapped;
+    // mapping from one coordinate system to the other.
+    for (LandmarkObs obs : observations) {
+      LandmarkObs observed;
+
+      // translation - rotate and shift
+      observed.x = obs.x * cos(p.theta) + obs.y * sin(p.theta) + p.x;
+      observed.y = obs.x * sin(p.theta) + obs.y * cos(p.theta) + p.y;
+
+      mapped.push_back(observed);
+    }
 
     // find predicted landmark for each observation
+    std::vector<LandmarkObs> predicted_landmarks;
+    for (Map::single_landmark_s landmark : map_landmarks.landmark_list) {
+      if (dist(landmark.x_f, landmark.y_f, p.x, p.y) <= sensor_range) {
+        LandmarkObs observed;
+        observed.id = landmark.id_i;
+        observed.x = landmark.x_f;
+        observed.y = landmark.y_f;
+        predicted_landmarks.push_back(observed);
+      }
+    }
 
-    // update the weights
+    double new_weight;
+
+    // no predictions found. not 100% sure what to do, assigning very small weight for now.
+    if((predicted_landmarks.size() == 0 && mapped.size() > 0) ||
+        (mapped.size() == 0 && predicted_landmarks.size() > 0)) {
+      new_weight = 1e-10; // TODO is this correct?
+    } else {
+      new_weight = 1; // neutral element of *
+
+      // use the nearest neighbor technique to associate observations and sensor measurements
+      dataAssociation(predicted_landmarks, mapped);
+
+      // calculate the multivariate gaussian probability density function for each landmark and
+      // take the product of all of them to find the new weight
+      for (LandmarkObs o: mapped) {
+        if (o.id > 0) {
+          const LandmarkObs current = predicted_landmarks[o.id];
+          //std::cout << current.x << " " << obs.x << " " << current.y << " " << obs.y << std::endl;
+          //std::cout << "new gauss stuff: " << calculate_likelihood(current.x - obs.x, current.y - obs.y, std_landmark[0], std_landmark[1]) << std::endl;
+          const double dx = current.x - o.x;
+          const double dy = current.y - o.y;
+          const double sigma_x = std_landmark[0];
+          const double sigma_y = std_landmark[1];
+          const double exp_expression = -0.5 * (((dx * dx) / (sigma_x * sigma_x)) + ((dy * dy) / (sigma_y * sigma_y)));
+          const double temp = exp(exp_expression) / (2 * M_PI * sigma_x * sigma_y);
+          //std::cout << " temp value: " << temp << std::endl;
+          //new_weight *= calculate_likelihood(current.x - o.x, current.y - o.y, std_landmark[0], std_landmark[1]);
+          new_weight *= temp;
+        }
+      }
+    }
+
+    // update particle
+    p.weight = new_weight;
+    // and weights array used for resampling
+    weights.push_back(new_weight);
   }
 }
 
