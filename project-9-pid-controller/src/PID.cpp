@@ -1,30 +1,37 @@
 #include "PID.h"
+#include "math.h"
 
 PID::PID() {}
 
 PID::~PID() {}
 
-void PID::Init(double Kp, double Ki, double Kd) {
-  // Initializing errors to 0
-  this->p_error = 0.0;
-  this->i_error = 0.0;
-  this->d_error = 0.0;
+void PID::Init(double Kp, double Ki, double Kd, double min_range, double max_range) {
+
+  prior_cte = 0.0;
+  sum_cte = 0.0;
 
   // Initializing coefficients to given values.
   // see README.md for reasoning on initial values
   this->Kp = Kp;
   this->Ki = Ki;
   this->Kd = Kd;
+
+  // Initializing ranges
+  this->min_range = min_range;
+  this->max_range = max_range;
 }
 
-void PID::UpdateError(double cte) {
-  d_error = cte - p_error;
-  p_error = cte;
-  i_error += cte;
-}
+double PID::NextMeasurement(double cte) {
 
-double PID::TotalError() {
-  return this->Kp * this->p_error +
-         this->Kd * this->d_error +
-         this->Ki * this->i_error;
+	// Calculate the next measurement, replacing UpdateError
+	double measurement = -Kp * cte - Kd * (prior_cte - cte) - Ki * sum_cte;
+
+	// Since output values should be in the interval [-1. 1], let's apply a sigmoid transform
+	measurement = (max_range - min_range) * (1 / (1 + exp(-measurement))) - (-1 * min_range);
+
+	// Update the cte history variables
+	prior_cte = cte;
+	sum_cte += cte;
+
+	return measurement;
 }

@@ -3,19 +3,25 @@
 
 class PID {
 public:
-  /*
-  * Errors
-  */
-  double p_error;
-  double i_error;
-  double d_error;
 
   /*
   * Coefficients
-  */ 
+  */
   double Kp;
   double Ki;
   double Kd;
+
+  /*
+  * keep cte history
+  */
+  double prior_cte;
+  double sum_cte;
+
+  /*
+  * parametrize to keep manage different ranges for steering and speed
+  */
+  double min_range;
+  double max_range;
 
   /*
   * Constructor
@@ -30,17 +36,13 @@ public:
   /*
   * Initialize PID.
   */
-  void Init(double Kp, double Ki, double Kd);
+  void Init(double Kp, double Ki, double Kd, double min_range, double max_range);
 
   /*
-  * Update the PID error variables given cross track error.
-  */
-  void UpdateError(double cte);
+   * Get the next value to send to the controller in main.cpp
+   */
+  double NextMeasurement(double cte);
 
-  /*
-  * Calculate the total PID error.
-  */
-  double TotalError();
 };
 
 #endif /* PID_H */
