@@ -3,6 +3,29 @@ Self-Driving Car Engineer Nanodegree Program
 
 ---
 
+## Discussion
+
+The code implements a PID controller to steer a car around Udacity's car simulator lake course. The main program uses two PID controllers, one to control the steering angle and one to control the throttle.
+
+Note: the output of the second controller has been capped at 0.25 to prevent the car from getting too fast, in fact rendering it useless. I have yet to fine-tune the controllers to work together reliable and not drive the car off the road every once in a while.
+
+I have modified the structure of the code a little bit, namely directly computing and returning the next value to use in the controller instead of just updating the error and acting on that. Moreover, to make the controller work for both steering and speed computations I have introduced two new parameters - `min_range` and `max_range`. This allows to control for possible values together with a sigmoid function to smooth the output values. In addition to that I removed the error variables, keeping track of the `cte` with `prior_cte` and `sum_cte` to replace `i_error` and `p_error`
+
+The tuning has been done manually.
+
+### Steering Controller
+
+* P = 0.2 to return relatively quickly to the center of the road after deviations, a small positive coefficient for the proportional component turned out to be enough
+* I = 0.0 no need to compensate for a constant estimation error, we direct measurements and the wheels are perfectly aligned.
+* D = -1.65 again to prevent overshooting, this time a large negative coefficient proved to be most effectful
+
+### Throttle Controller
+In contrast to the steering controller which takes the `cte` as its input, the throttle controller takes the absolute value of current steering angle to compute how to accelerate or not.
+
+* P = 0.135 to get the car moving, applying a small positive coefficient here.
+* I = 0.0 again nothing to correct for with the integral component
+* D = -0.75 this one is probably to blame for the car becoming too fast and starting to steer more wildly, but it has been rather difficult to get it to a sane value
+
 ## Dependencies
 
 * cmake >= 3.5
@@ -25,7 +48,7 @@ Self-Driving Car Engineer Nanodegree Program
 1. Clone this repo.
 2. Make a build directory: `mkdir build && cd build`
 3. Compile: `cmake .. && make`
-4. Run it: `./pid`. 
+4. Run it: `./pid`.
 
 ## Editor Settings
 
