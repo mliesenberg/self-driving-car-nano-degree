@@ -91,52 +91,62 @@ int main() {
           double py = j[1]["y"];
           double psi = j[1]["psi"];
           double v = j[1]["speed"];
+          double steering_angle = j[1]["steering_angle"];
+          double throttle = j[1]["throttle"];
 
-          /*
-          * TODO: Calculate steeering angle and throttle using MPC.
-          *
-          * Both are in between [-1, 1].
-          *
-          */
-          double steer_value;
-          double throttle_value;
+          // convert between global space and vehicle space
+          const int waypoints = ptsx.size();
+          Eigen::VectorXd waypoints_xs(waypoints);
+          Eigen::VectorXd waypoints_ys(waypoints);
+
+          for (int i = 0; i < waypoints; ++i) {
+            double dx = ptsx[i] - px;
+            double dy = ptsy[i] - py;
+
+            waypoints_xs[i] = dx * cos(-psi) - dy * sin(-psi);
+            waypoints_ys[i] = dy * cos(-psi) + dx * sin(-psi);
+          }
+          // fit the polynomial
+          auto polynomial = polyfit(waypoints_xs, waypoints_ys, 3);
+
+          // prepare display of fitted curvature
+          std::vector<double> next_xs(N);
+          std::vector<double> next_ys(N);
+
+          for (int i = 0; i < N; ++i) {
+            const double dx = 5.0 * i;
+            next_xs[i] = dx;
+            next_ys[i] = polynomial[3] * dx * dx * dx + polynomial[2] * dx * dx + polynomial[1] * dx + polynomial[0];
+          }
+
+          // compute current error estimates
+          const double cte = polynomial[0];
+          const double epsi = -atan(polynomial[1]);
+
+          const double current_px = 0.0 + v * dt;
+          const double current_py = 0.0;
+          const double current_psi = 0.0 + v * (-steering_angle) / Lf * dt;
+          const double current_v = v + throttle * dt;
+          const double current_cte = cte + v * sin(epsi) * dt;
+          const double current_epsi = epsi + v * (-steering_angle) / Lf * dt;
+
+          Eigen::VectorXd state(6);
+          state << current_px, current_py, current_psi, current_v, current_cte, current_epsi;
+          // do the actual prediction of the next actions.
+          auto result = mpc.solve(state, polynomial);
 
           json msgJson;
-          msgJson["steering_angle"] = steer_value;
-          msgJson["throttle"] = throttle_value;
+          msgJson["steering_angle"] = -result[0];
+          msgJson["throttle"] = result[1];
 
-          //Display the MPC predicted trajectory 
-          vector<double> mpc_x_vals;
-          vector<double> mpc_y_vals;
+          msgJson["mpc_x"] = result[2];
+          msgJson["mpc_y"] = result[3];
 
-          //.. add (x,y) points to list here, points are in reference to the vehicle's coordinate system
-          // the points in the simulator are connected by a Green line
-
-          msgJson["mpc_x"] = mpc_x_vals;
-          msgJson["mpc_y"] = mpc_y_vals;
-
-          //Display the waypoints/reference line
-          vector<double> next_x_vals;
-          vector<double> next_y_vals;
-
-          //.. add (x,y) points to list here, points are in reference to the vehicle's coordinate system
-          // the points in the simulator are connected by a Yellow line
-
-          msgJson["next_x"] = next_x_vals;
-          msgJson["next_y"] = next_y_vals;
-
+          msgJson["next_x"] = next_xs;
+          msgJson["next_y"] = next_ys;
 
           auto msg = "42[\"steer\"," + msgJson.dump() + "]";
-          std::cout << msg << std::endl;
-          // Latency
-          // The purpose is to mimic real driving conditions where
-          // the car does actuate the commands instantly.
-          //
-          // Feel free to play around with this value but should be to drive
-          // around the track with 100ms latency.
-          //
-          // NOTE: REMEMBER TO SET THIS TO 100 MILLISECONDS BEFORE
-          // SUBMITTING.
+
           this_thread::sleep_for(chrono::milliseconds(100));
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
         }
