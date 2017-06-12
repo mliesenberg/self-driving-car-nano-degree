@@ -13,7 +13,7 @@ const double Lf = 2.67; // this is the length from front to Center-of-Gravity (C
 
 const double ref_cte = 0; // reference cross track error
 const double ref_epsi = 0; // reference orientation error
-const double ref_v = 40; // reference velocity
+const double ref_v = 80; // reference velocity
 
 // indices of the start of each variable in the input to the solver
 const int x_start = 0;
@@ -31,7 +31,7 @@ const double w_epsi = 1500.0;
 const double w_v = 1.0;
 const double w_delta = 10.0;
 const double w_a = 10.0;
-const double w_d_delta = 150.0;
+const double w_d_delta = 10000.0;
 const double w_d_a = 15.0;
 
 class MPC {
