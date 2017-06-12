@@ -43,6 +43,11 @@ class MPC {
   // Solve the model given an initial state and polynomial coefficients.
   // Return the first actuatotions.
   vector<double> solve(Eigen::VectorXd state, Eigen::VectorXd coeffs);
+
+  // vectors to store the predicted path to be drawn in green.
+  vector<double> x_pred;
+  vector<double> y_pred;
+  void clear_prediction();
 };
 
 #endif /* MPC_H */

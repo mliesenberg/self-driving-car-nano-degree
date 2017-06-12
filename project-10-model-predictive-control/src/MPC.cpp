@@ -233,13 +233,20 @@ vector<double> MPC::solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
   result.push_back(solution.x[delta_start]);
   result.push_back(solution.x[a_start]);
 
-  for(int i = x_start ; i < y_start; i++){
-    result.push_back(solution.x[i]);
+  vector<double> x_pred;
+  for (int i = x_start ; i < y_start; i++) {
+    this->x_pred.push_back(solution.x[i]);
   }
 
-  for(int i = y_start; i < psi_start; i++){
-    result.push_back(solution.x[i]);
+  vector<double> y_pred;
+  for (int i = y_start; i < psi_start; i++) {
+    this->y_pred.push_back(solution.x[i]);
   }
 
   return result;
+}
+
+void MPC::clear_prediction() {
+  x_pred.clear();
+  y_pred.clear();
 }

@@ -139,13 +139,15 @@ int main() {
           msgJson["steering_angle"] = -result[0];
           msgJson["throttle"] = result[1];
 
-          msgJson["mpc_x"] = result[2];
-          msgJson["mpc_y"] = result[3];
+          msgJson["mpc_x"] = mpc.x_pred;
+          msgJson["mpc_y"] = mpc.y_pred;
 
           msgJson["next_x"] = next_xs;
           msgJson["next_y"] = next_ys;
 
           auto msg = "42[\"steer\"," + msgJson.dump() + "]";
+          // a bit hacky, but clearing the predicted points.
+          mpc.clear_prediction();
 
           this_thread::sleep_for(chrono::milliseconds(100));
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
