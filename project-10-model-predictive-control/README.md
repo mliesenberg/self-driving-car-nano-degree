@@ -2,6 +2,48 @@
 Self-Driving Car Engineer Nanodegree Program
 
 ---
+## The MPC Model
+The Model Predictive Controller (MPC) implemented in this project predicts/calulates a trajectory and actuations of a car in the simulator and sends those back to the simulator to drive the car forward. <br/>
+As discussed in the lessons, the state vector of the vehicle is given by:
+```
+x - vehicle position on x axis
+y - vehicle position on y axis
+psi - yaw angle
+v - speed of the vehicle
+cte - cross-track error
+epsi - orientation error
+delta - steering angle (actuator)
+a - acceleration (actuator)
+
+Lf - the distance between the center of mass of the vehicle and the front wheels.
+```
+a precomputed `Lf` has been used as provided by udacity
+
+Given the state vector, the model state at timestep `t+1` is expressed by the following equations:
+
+```
+      x[t+1] = x[t] + v[t] * cos(psi[t]) * dt
+      y[t+1] = y[t] + v[t] * sin(psi[t]) * dt
+      psi[t+1] = psi[t] + v[t] / Lf * delta[t] * dt
+      v[t+1] = v[t] + a[t] * dt
+      cte[t+1] = f(x[t]) - y[t] + v[t] * sin(epsi[t]) * dt
+      epsi[t+1] = psi[t] - psides[t] + v[t] * delta[t] / Lf * dt
+```
+
+## Polynomial Fitting and MPC Preprocessing
+The waypoints from the simulator are transformed to vehicle coordinates by translation and rotation.
+```
+      waypoints_xs[i] = dx * cos(-psi) - dy * sin(-psi);
+      waypoints_ys[i] = dy * cos(-psi) + dx * sin(-psi);
+```
+
+A third degree polynomial is used to calculate the trajectory of the car. The degree was chosen based on the lectures and the fact that most real world roads can be expressed by a third degree polynomial. With a second degree polynomial we'd have had difficulties fitting a serpentine road for example.
+Using the polynomial and the current state, the MPC solves the optimization problem and predicts required values for going further.
+
+## Timesteps and Elapsed Duration (N & dt)
+Timesteps and Frequency were chosen by trial and error. I started with 15 timesteps of 0.2 duration with a speed of 40. The car showed rather erratic behavior with those values which was not alleviated by increasing N.
+The faster the car goes, the further the algorithm will have to look into the future to still show ok behavior, while smooth driving is mostly controlled by `dt`. I settled for `N`=10 and `dt`=0.1 with a reference velocity of 80. The predicted lines sometimes show rather erratic paths, but the car still drives smoothly along.
+
 
 ## Dependencies
 
@@ -25,7 +67,7 @@ Self-Driving Car Engineer Nanodegree Program
   * Mac: `brew install ipopt`
   * Linux
     * You will need a version of Ipopt 3.12.1 or higher. The version available through `apt-get` is 3.11.x. If you can get that version to work great but if not there's a script `install_ipopt.sh` that will install Ipopt. You just need to download the source from the Ipopt [releases page](https://www.coin-or.org/download/source/Ipopt/) or the [Github releases](https://github.com/coin-or/Ipopt/releases) page.
-    * Then call `install_ipopt.sh` with the source directory as the first argument, ex: `bash install_ipopt.sh Ipopt-3.12.1`. 
+    * Then call `install_ipopt.sh` with the source directory as the first argument, ex: `bash install_ipopt.sh Ipopt-3.12.1`.
   * Windows: TODO. If you can use the Linux subsystem and follow the Linux instructions.
 * [CppAD](https://www.coin-or.org/CppAD/)
   * Mac: `brew install cppad`
