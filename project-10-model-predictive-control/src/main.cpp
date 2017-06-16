@@ -123,6 +123,7 @@ int main() {
           const double cte = polynomial[0];
           const double epsi = -atan(polynomial[1]);
 
+          // compute current state with delay in mind
           const double current_px = 0.0 + v * dt;
           const double current_py = 0.0;
           const double current_psi = 0.0 + v * (-steering_angle) / Lf * dt;

@@ -44,6 +44,17 @@ Using the polynomial and the current state, the MPC solves the optimization prob
 Timesteps and Frequency were chosen by trial and error. I started with 15 timesteps of 0.2 duration with a speed of 40. The car showed rather erratic behavior with those values which was not alleviated by increasing N.
 The faster the car goes, the further the algorithm will have to look into the future to still show ok behavior, while smooth driving is mostly controlled by `dt`. I settled for `N`=10 and `dt`=0.1 with a reference velocity of 80. The predicted lines sometimes show rather erratic paths, but the car still drives smoothly along.
 
+## Model Predictive Control and Latency
+We have to take a certain amount of latency into account - 100ms - so instead of using the state as is, we compute the state with the delay factored in using our kinematic model. After that we are ready to pass the state to the solver to get an indication of what the next state will be.
+```
+      // compute current state with delay in mind
+      const double current_px = 0.0 + v * dt;
+      const double current_py = 0.0;
+      const double current_psi = 0.0 + v * (-steering_angle) / Lf * dt;
+      const double current_v = v + throttle * dt;
+      const double current_cte = cte + v * sin(epsi) * dt;
+      const double current_epsi = epsi + v * (-steering_angle) / Lf * dt;
+```
 
 ## Dependencies
 
