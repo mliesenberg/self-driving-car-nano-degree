@@ -1,6 +1,6 @@
 # CarND-Path-Planning-Project
 Self-Driving Car Engineer Nanodegree Program
-   
+
 ### Simulator.
 You can download the Term3 Simulator which contains the Path Planning Project from the [releases tab (https://github.com/udacity/self-driving-car-sim/releases).
 
@@ -18,6 +18,20 @@ The highway's waypoints loop around so the frenet s value, distance along the ro
 2. Make a build directory: `mkdir build && cd build`
 3. Compile: `cmake .. && make`
 4. Run it: `./path_planning`.
+
+## General approach
+
+Using the data we get data from the simulator, the following steps are performed to generate/plan a path.
+- we compute the jerk minimizing trajectory, first converting the coordinates to car coordinates
+- for the generation of the JMT path we first pick 5 anchor points. 2 are coming from the previously reported path given by the simulator and 3 which we generate ourselves each 50m apart
+- then we fit a spline to the above points and then upsample in order to have enough points for the path to steer the car along
+- afterwards the generated path is fed to the simulator after converting the points back to global map coordinates
+- based on proximity of the next cars the behavior planner takes an appropriate action - slowing down, overtaking or keeping the current speed
+
+## Potential Improvements
+
+- the implementation is rather simplistic and works fairly well, however there might be problems when other cars quickly move into our lane
+- slowing down of other cars often leads to lane changes by them, that is not yet incorporated but could be a useful thing to include in future implementations
 
 Here is the data provided from the Simulator to the C++ Program
 
@@ -38,13 +52,13 @@ Here is the data provided from the Simulator to the C++ Program
 #### Previous path data given to the Planner
 
 //Note: Return the previous list but with processed points removed, can be a nice tool to show how far along
-the path has processed since last time. 
+the path has processed since last time.
 
 ["previous_path_x"] The previous list of x points previously given to the simulator
 
 ["previous_path_y"] The previous list of y points previously given to the simulator
 
-#### Previous path's end s and d values 
+#### Previous path's end s and d values
 
 ["end_path_s"] The previous list's last point's frenet s value
 
@@ -52,7 +66,7 @@ the path has processed since last time.
 
 #### Sensor Fusion Data, a list of all other car's attributes on the same side of the road. (No Noise)
 
-["sensor_fusion"] A 2d vector of cars and then that car's [car's unique ID, car's x position in map coordinates, car's y position in map coordinates, car's x velocity in m/s, car's y velocity in m/s, car's s position in frenet coordinates, car's d position in frenet coordinates. 
+["sensor_fusion"] A 2d vector of cars and then that car's [car's unique ID, car's x position in map coordinates, car's y position in map coordinates, car's x velocity in m/s, car's y velocity in m/s, car's s position in frenet coordinates, car's d position in frenet coordinates.
 
 ## Details
 
@@ -82,7 +96,7 @@ A really helpful resource for doing this project and creating smooth trajectorie
   * Run either `install-mac.sh` or `install-ubuntu.sh`.
   * If you install from source, checkout to commit `e94b6e1`, i.e.
     ```
-    git clone https://github.com/uWebSockets/uWebSockets 
+    git clone https://github.com/uWebSockets/uWebSockets
     cd uWebSockets
     git checkout e94b6e1
     ```
