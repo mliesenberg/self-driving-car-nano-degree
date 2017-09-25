@@ -135,8 +135,31 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_l
     :param keep_prob: TF Placeholder for dropout keep probability
     :param learning_rate: TF Placeholder for learning rate
     """
-    # TODO: Implement function
-    pass
+    # initialize
+    init = tf.global_variables_initializer()
+    sess.run(init)
+
+    # keep prob for dropout
+    k_prob = 0.5
+    # learning rate
+    l_rate = 0.001
+
+    # start training
+    print("Starting training...")
+    for i in range(epochs):
+        training_loss = 0.0
+        for batch_x, batch_y in get_batches_fn(batch_size):
+            feed_dict = {input_image: batch_x,
+                         correct_label: batch_y,
+                         keep_prob: k_prob,
+                         learning_rate: l_rate}
+
+            _ , loss = sess.run((train_op, cross_entropy_loss), feed_dict = feed_dict)
+            training_loss += (loss * len(batch_x))
+
+        # print some stats.
+        print("{:3d} {:.6f} ".format(i + 1, training_loss))
+
 tests.test_train_nn(train_nn)
 
 
@@ -149,6 +172,9 @@ def run():
 
     # Download pretrained vgg model
     helper.maybe_download_pretrained_vgg(data_dir)
+
+    epochs = 50
+    batch_size = 10
 
     # OPTIONAL: Train and Inference on the cityscapes dataset instead of the Kitti dataset.
     # You'll need a GPU with at least 10 teraFLOPS to train on.
@@ -163,14 +189,27 @@ def run():
         # OPTIONAL: Augment Images for better results
         #  https://datascience.stackexchange.com/questions/5224/how-to-prepare-augment-images-for-neural-network
 
-        # TODO: Build NN using load_vgg, layers, and optimize function
+        # load vgg
+        vgg_input, vgg_keep_prob, vgg_layer3, vgg_layer4, vgg_layer7 = load_vgg(sess, vgg_path)
 
-        # TODO: Train NN using the train_nn function
+        # define network vgg layers
+        network = layers(vgg_layer3, vgg_layer4, vgg_layer7, num_classes)
 
-        # TODO: Save inference data using helper.save_inference_samples
-        #  helper.save_inference_samples(runs_dir, data_dir, sess, image_shape, logits, keep_prob, input_image)
+        # set labels placeholder
+        correct_label = tf.placeholder(tf.float32, shape = [None, image_shape[0], image_shape[1], num_classes])
 
-        # OPTIONAL: Apply the trained model to a video
+        # define learning rate placeholder
+        learning_rate = tf.placeholder(tf.float32, None)
+
+        # set tensorflow operations for training and loss
+        logits, training_op, cross_entropy_loss = optimize(network, correct_label, learning_rate, num_classes)
+
+        # train network
+        train_nn(sess, epochs, batch_size, get_batches_fn, training_op, cross_entropy_loss, vgg_input,
+                 correct_label, vgg_keep_prob, learning_rate)
+
+        # save test samples
+        helper.save_inference_samples(runs_dir, data_dir, sess, image_shape, logits, vgg_keep_prob, vgg_input)
 
 
 if __name__ == '__main__':
