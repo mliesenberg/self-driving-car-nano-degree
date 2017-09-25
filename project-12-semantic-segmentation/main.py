@@ -45,6 +45,15 @@ def load_vgg(sess, vgg_path):
     return image_input, keep_prob, layer3_out, layer4_out, layer7_out
 tests.test_load_vgg(load_vgg, tf)
 
+def conv1x1(tensor, num_classes):
+    return tf.layers.conv2d(tensor, num_classes, 1, padding="same",
+                            kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3),
+                            kernel_initializer =tf.truncated_normal_initializer(stddev=0.01))
+
+def deconv(tensor, num_classes):
+    return tf.layers.conv2d_transpose(tensor, num_classes, 4, 2, padding="same",
+                                      kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3),
+                                      kernel_initializer =tf.truncated_normal_initializer(stddev=0.01))
 
 def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
     """
@@ -55,8 +64,34 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
     :param num_classes: Number of classes to classify
     :return: The Tensor for the last layer of output
     """
-    # TODO: Implement function
-    return None
+
+    # add 1x1 convolutional layer
+    l7_conv_1x1 = conv1x1(vgg_layer7_out, num_classes)
+
+     # add first deconvolution layer
+    deconv1 = deconv(l7_conv_1x1, num_classes)
+
+     # 1x1 convolution of layer 4
+    l4_conv_1x1 = conv1x1(vgg_layer4_out, num_classes)
+
+    # add skip connection between layer 4 and first deconvolutional layer
+    skip1 = tf.add(l4_conv_1x1, deconv1)
+
+    # second deconvolutional layer
+    deconv2 = deconv(skip1, num_classes)
+
+    # 1x1 convolution of layer 3
+    l3_conv_1x1 = conv1x1(vgg_layer3_out, num_classes)
+
+    # add skip connection with layer 3 and second deconvolutional layer
+    skip2 = tf.add(l3_conv_1x1, deconv2)
+
+      # add deconvolution back to original size
+    output_layer = tf.layers.conv2d_transpose(skip2, num_classes, 16, 8, padding="same",
+                                        kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3),
+                                        kernel_initializer =tf.truncated_normal_initializer(stddev=0.01))
+
+    return output_layer
 tests.test_layers(layers)
 
 
